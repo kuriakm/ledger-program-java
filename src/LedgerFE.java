@@ -86,25 +86,21 @@ public class LedgerFE {
         }
     }
 
-    public static void addTrans() {
-        try {
-            System.out.println("What type of transaction are you adding? [Type D for DEPOSIT OR W for WITHDRAWAL]");
-            String type = k.nextLine();
+    public static void addTrans() throws ParseException {
+        System.out.println("What type of transaction are you adding? [Type D for DEPOSIT OR W for WITHDRAWAL]");
+        String type = k.nextLine();
 
-            System.out.println("When did this transaction occur? [Type date using yyyy-MM-dd format]");
-            String sDate = k.nextLine();
-            Date date = df.parse(sDate);
+        System.out.println("When did this transaction occur? [Type date using yyyy-MM-dd format]");
+        String sDate = k.nextLine();
+        Date date = df.parse(sDate);
 
-            System.out.println("What was the amount for this transaction? [Use only positive numbers]");
-            System.out.print("$");
-            String amt = k.nextLine();
-            BigDecimal amount = new BigDecimal(amt);
+        System.out.println("What was the amount for this transaction? [Use only positive numbers]");
+        System.out.print("$");
+        String amt = k.nextLine();
+        BigDecimal amount = new BigDecimal(amt);
 
-            Transactions aT = new Transactions(type, date, amount);
-            ledger.addTrans(aT);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        Transactions aT = new Transactions(type, date, amount);
+        ledger.addTrans(aT);
     }
 
     public static void removeTrans() {
@@ -130,6 +126,8 @@ public class LedgerFE {
     public static void readFile() throws ParseException {
         System.out.println("Type the name of the file you wish to use.");
         String fName = k.nextLine();
+        // If a file does not meet the current file format via this check
+        // the readFileWithoutHeader() method in the Ledger class is utilized
         ledger.readFile(fName);
     }
 

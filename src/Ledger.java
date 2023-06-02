@@ -9,8 +9,8 @@ import java.util.HashMap;
 public class Ledger {
     private HashMap<String, Transactions> ledger = new HashMap<String, Transactions>();;
     public static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    public static final int LINE = 4;
     public static final String DELIM = "\t";
+    public static final String FIRST_CHECK = "TRANSACTION ID";
 
     public Ledger() { // Since the HashMap is already instantiated, I left this method blank
     }
@@ -88,13 +88,45 @@ public class Ledger {
             arr[k++] = r[j++];
     } */
 
+    public static final int HEADER_FIELD = 4, BODY_FIELD = 4;
     public void readFile(String name) throws ParseException {
+        try {
+            Scanner read = new Scanner(new File(name));
+            // Read header
+            String firstLine = read.nextLine();
+            String[] headerLine = firstLine.split(DELIM);
+            if (headerLine.length != HEADER_FIELD && headerLine[0] != FIRST_CHECK) {
+                    read.close();
+                    readFileWithoutHeader(name);
+            }
+            else {
+                while(read.hasNextLine()) {
+                    String fileLine = read.nextLine();
+                    String[] splitLine = fileLine.split(DELIM);
+                    if (splitLine.length != BODY_FIELD) // Check to make sure there are four pieces of info
+                        continue;
+                    String id = splitLine[0];
+                    String type = splitLine[1];
+                    Date date = df.parse(splitLine[2]);
+                    BigDecimal amount = new BigDecimal(splitLine[3]);
+                    Transactions aT = new Transactions(type, date, amount, id);
+                    this.addTrans(aT);
+                }
+                read.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Added interoperablity for older file formats (aka ones without a header)
+    public void readFileWithoutHeader(String name) throws ParseException {
         try {
             Scanner read = new Scanner(new File(name));
             while(read.hasNextLine()) {
                 String fileLine = read.nextLine();
                 String[] splitLine = fileLine.split(DELIM);
-                if (splitLine.length != LINE) // Check to make sure there are four pieces of info
+                if (splitLine.length != BODY_FIELD) // Check to make sure there are four pieces of info
                     continue;
                 String id = splitLine[0];
                 String type = splitLine[1];
@@ -114,6 +146,9 @@ public class Ledger {
             PrintWriter fileWrite = new PrintWriter(new FileOutputStream(new File(name)));
             // Transactions[] sorted = sortByDate();
             // for (Transactions t : sorted)
+            // Print Header
+            fileWrite.println("TRANSACTION ID"+DELIM+"TYPE"+DELIM+"DATE"+DELIM+"AMOUNT");
+            // Print Content
             for (HashMap.Entry<String, Transactions> entry : ledger.entrySet())
                 fileWrite.println(entry.getValue().getID()+DELIM+entry.getValue().getType()+DELIM+df.format(entry.getValue().getDate())+DELIM+entry.getValue().getAmount());
             fileWrite.close();
