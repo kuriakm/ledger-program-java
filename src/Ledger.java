@@ -15,6 +15,13 @@ public class Ledger {
     public Ledger() { // Since the HashMap is already instantiated, I left this method blank
     }
 
+    public boolean isEmpty() {
+        if (ledger.isEmpty())
+            return true;
+        else
+            return false;
+    }
+
     public void addTrans(Transactions aT) {
         if (aT == null) // Precursor check
             return;
@@ -44,6 +51,18 @@ public class Ledger {
             System.out.println(t); */
         for (HashMap.Entry<String, Transactions> entry : ledger.entrySet())
             System.out.println(entry.getValue());
+    }
+
+    public void editType(String key, String updatedType) {
+        ledger.put(key, new Transactions(updatedType, ledger.get(key).getDate(), ledger.get(key).getAmount(), key));
+    }
+
+    public void editDate(String key, Date updatedDate) {
+        ledger.put(key, new Transactions(ledger.get(key).getType(), updatedDate, ledger.get(key).getAmount(), key));
+    }
+
+    public void editAmount(String key, BigDecimal updatedAmount) throws ParseException {
+        ledger.put(key, new Transactions(ledger.get(key).getType(), ledger.get(key).getDate(), updatedAmount, key));
     }
 
     /* private Transactions[] sortByDate() {

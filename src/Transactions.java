@@ -41,8 +41,8 @@ public class Transactions implements Comparable<Transactions>{
             System.out.println("Invalid transaction type.");
     }
 
-    public BigDecimal getAmount() {
-        return this.amt;
+    public BigDecimal getAmount() throws ArithmeticException {
+        return this.amt.setScale(2);
     }
 
     public void setAmount(BigDecimal aA) {
@@ -72,7 +72,7 @@ public class Transactions implements Comparable<Transactions>{
         this.id = generateKey();
     }
 
-    public void setID(String aID) { // For read-in files that have ID
+    public void setID(String aID) { // For read-in files that have an ID
         if (aID != null)
             this.id = aID;
     }
@@ -90,12 +90,12 @@ public class Transactions implements Comparable<Transactions>{
             return "["+this.type+"]: \n"+
                 "   Transaction ID: "+this.id+" \n"+
                 "   Date: "+df.format(this.date)+" \n"+
-                "   Amount: $"+this.amt;
+                "   Amount: $"+this.amt.setScale(2);
         else
             return "["+this.type+"]: \n"+
                 "   Transaction ID: "+this.id+" \n"+
                 "   Date: "+df.format(this.date)+" \n"+
-                "   Amount: -$"+this.amt;
+                "   Amount: -$"+this.amt.setScale(2);
     }
 
     public boolean equals(Transactions aT) {

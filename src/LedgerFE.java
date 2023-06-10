@@ -12,6 +12,7 @@ public class LedgerFE {
     // I added these in case I wanted to make changes in the wording + it's easier to reference in code
     public static final String ADD = "ADD";
     public static final String REM = "REMOVE";
+    public static final String EDIT = "EDIT";
     public static final String PRINT = "PRINT";
     public static final String READ = "READ";
     public static final String WRITE = "WRITE";
@@ -19,14 +20,16 @@ public class LedgerFE {
     public static final String QUIT = "QUIT";
     public static final String YES = "YES";
     public static final String NO = "NO";
+    private static String userFile = null;
 
     public static void main(String[] args) throws ParseException {
         printGreetings();
         System.out.println("Do you have a file you would like to add?\nType [Y/n]");
         String answer = k.nextLine();
         if (answer.equalsIgnoreCase(YES) || answer.equalsIgnoreCase("Y")) {
-            System.out.println("Great!");
-            readFile();
+            System.out.println("Great! Enter the name of the file you wish to use.");
+            userFile = k.nextLine();
+            ledger.readFile(userFile);
             System.out.println("The total amount of money you have is: $"+ledger.totalUp());
             menu();
         } else {
@@ -41,7 +44,8 @@ public class LedgerFE {
 
     public static void printChoices() {
         System.out.println("\nWelcome to the menu!\nType "+ADD+" to add a transaction\n"+
-            REM+" to remove a transaction by date and amount\n"+
+            REM+" to remove a transaction by ID\n"+
+            EDIT+" to edit a pre-existing transaction\n"+
             PRINT+" to print your current transactions listed\n"+
             READ+" to read a file with pre-existing transactions\n"+
             WRITE+" to write a file with your current transactions\n"+
@@ -65,6 +69,9 @@ public class LedgerFE {
                     removeTrans();
                     printTrans();
                     break;
+                case EDIT:
+                    editTrans();
+                    printTrans();
                 case PRINT:
                     printTrans();
                     break;
@@ -109,6 +116,52 @@ public class LedgerFE {
         ledger.removeTrans(pID);
     }
 
+    public static void editTrans() throws ParseException {
+        if (ledger.isEmpty() == true) {
+            System.out.println("There are no transactions to edit. Add a transaction first before attempting to edit something.");
+        } else {
+            System.out.println("Type the ID of the transaction you want to edit.");
+            String pID = k.nextLine();
+            System.out.println("What would you like to edit? Type \"T\" or TYPE to edit transaction type,"+
+            "\"D\" or DATE to edit the date, \"A\" or AMOUNT to edit the amount, or \"MORE\" to edit more than one field.");
+            String editChoice = k.nextLine();
+
+            if (editChoice.equalsIgnoreCase("TYPE") || editChoice.equalsIgnoreCase("T")) {
+                System.out.println("What type of transaction are you adding? [Type D for DEPOSIT OR W for WITHDRAWAL]");
+                String type = k.nextLine();
+                ledger.editType(pID, type);
+            } else if (editChoice.equalsIgnoreCase("DATE") || editChoice.equalsIgnoreCase("D")) {
+                System.out.println("When did this transaction occur? [Type date using yyyy-MM-dd format]");
+                String dateS = k.nextLine();
+                Date date = df.parse(dateS);
+                ledger.editDate(pID, date);
+            } else if (editChoice.equalsIgnoreCase("AMOUNT") || editChoice.equalsIgnoreCase("A")) {
+                System.out.println("What was the amount for this transaction? [Use only positive numbers]");
+                String amountS = k.nextLine();
+                BigDecimal amount = new BigDecimal(amountS);
+                ledger.editAmount(pID, amount);
+            } else if (editChoice.equalsIgnoreCase("MORE")) {
+                System.out.println("What type of transaction are you adding? [Type D for DEPOSIT, W for WITHDRAWAL or K to keep the current value]");
+                String typeChoice = k.nextLine();
+                if (!typeChoice.equalsIgnoreCase("K")) {
+                    ledger.editType(pID, typeChoice);
+                }
+                System.out.println("When did this transaction occur? [Type date using yyyy-MM-dd format or K to keep the current value]");
+                String dateChoice = k.nextLine();
+                if (!dateChoice.equalsIgnoreCase("K")) {
+                    Date dateDecided = df.parse(dateChoice);
+                    ledger.editDate(pID, dateDecided);
+                }
+                System.out.println("What was the amount for this transaction? [Use only positive numbers or type K to keep the current value]");
+                String amountChoice = k.nextLine();
+                if (!amountChoice.equalsIgnoreCase("K")) {
+                    BigDecimal amountDecided = new BigDecimal(amountChoice);
+                    ledger.editAmount(pID, amountDecided);
+                }
+            }
+        }
+    }
+
     public static void delete() {
         // Present warning before letting user delete ledger value
         System.out.println("Are you sure you want to clear the ledger of all transactions?"+
@@ -142,7 +195,11 @@ public class LedgerFE {
         String saveChoice = k.nextLine();
 
         if (saveChoice.equalsIgnoreCase("Y") || saveChoice.equalsIgnoreCase(YES)) {
-            writeToFile();
+            if (userFile == null) {
+                writeToFile();
+            } else {
+                ledger.writeToFile(userFile);
+            }
             System.out.println("Goodbye!");
         } else {
             System.out.println("Goodbye!");
