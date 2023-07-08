@@ -106,7 +106,7 @@ public class Transactions implements Comparable<Transactions>{
     }
 
     public int compareTo(Transactions aT) {
-        return (this.date.compareTo(aT.date) < 0) ? -1 : ((this.date == aT.date) ? (this.type.compareTo(aT.type)) : 1);
+        return (this.type.compareTo(aT.type) < 0) ? -1 : ((this.type == aT.type) ? (this.date.compareTo(aT.date)) : 1);
     }
 
     /*

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.Scanner;
+//import java.util.Map.Entry;
 import java.util.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,16 +66,53 @@ public class Ledger {
         ledger.put(key, new Transactions(ledger.get(key).getType(), ledger.get(key).getDate(), updatedAmount, key));
     }
 
-    /* private Transactions[] sortByDate() {
+    // If the transaction was found, the user will be informed and the transaction will display on the screen
+    public boolean searchTrans(String key) {
+        if (ledger.containsKey(key)) {
+                System.out.println("\nThe transaction was found!\n"+ledger.get(key));
+                return true;
+        }
+        return false;
+    }
+
+    public boolean searchTrans(String type, Date date, BigDecimal amount) throws ParseException {
+        if (type != null && date != null && amount != null) {
+            Transactions searchValue = new Transactions(type, date, amount);
+            for (HashMap.Entry<String, Transactions> entry : ledger.entrySet()) {
+                if (entry.getValue().equals(searchValue)) {
+                    System.out.println("\nThe transaction was found!\n"+entry.getValue());
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+/*     public boolean contains(Transactions searchValue) {
+        for (HashMap.Entry<String, Transactions> entry : ledger.entrySet()) {
+            if (entry.getValue().getType().equals(searchValue.getType())
+                && entry.getValue().getDate().equals(searchValue.getDate())
+                && entry.getValue().getAmount().equals(searchValue.getAmount()))
+                return true;
+            }
+        return false;
+    } */
+/* 
+    private Transactions[] sortByDate() {
         // Converted HashMap into sortable array for printing
         Transactions[] sortedLedger = new Transactions[ledger.size()];
+        int i = 0;
+        for (Entry<String, Transactions> entry : ledger.entrySet()) {
+            sortedLedger[i] = entry.getValue();
+            i++;
+        }
         mergeSort(sortedLedger, ledger.size());
         return sortedLedger;
-    } */
+    }
 
     // Big O Time Complexity: O(nlogn)
     // Big O Space Complexity: O(n)
-    /* private static void mergeSort(Transactions arr[], int size) {
+    private static void mergeSort(Transactions arr[], int size) {
         if (size < 2)
             return;
         int mid = size / 2;
@@ -95,7 +133,7 @@ public class Ledger {
     private static void merge(Transactions arr[], Transactions[] l, Transactions[] r, int left, int right) {
         int i = 0, j = 0, k = 0;
         while (i < left && j < right) {
-            if (l[i].getDate().compareTo(r[j].getDate()) <= 0)
+            if (l[i].compareTo(r[j]) <= 0)
                 arr[k++] = l[i++];
             else
                 arr[k++] = r[j++];
@@ -105,8 +143,8 @@ public class Ledger {
             arr[k++] = l[i++];
         while (j < right)
             arr[k++] = r[j++];
-    } */
-
+    }
+ */
     public static final int HEADER_FIELD = 4, BODY_FIELD = 4;
     public void readFile(String name) throws ParseException {
         try {
@@ -167,9 +205,12 @@ public class Ledger {
             // for (Transactions t : sorted)
             // Print Header
             fileWrite.println("TRANSACTION ID"+DELIM+"TYPE"+DELIM+"DATE"+DELIM+"AMOUNT");
+            // Testing new format below
+            //fileWrite.println("TRANSACTION ID"+DELIM+"TYPE"+DELIM+DELIM+"DATE"+DELIM+DELIM+"AMOUNT");
             // Print Content
-            for (HashMap.Entry<String, Transactions> entry : ledger.entrySet())
-                fileWrite.println(entry.getValue().getID()+DELIM+entry.getValue().getType()+DELIM+df.format(entry.getValue().getDate())+DELIM+entry.getValue().getAmount());
+            for (HashMap.Entry<String, Transactions> entry : ledger.entrySet()) //TODO fix format for Deposits and Withdrawals
+            fileWrite.println(entry.getValue().getID()+DELIM+entry.getValue().getType()+DELIM+df.format(entry.getValue().getDate())+DELIM+entry.getValue().getAmount());
+                //fileWrite.println(entry.getValue().getID()+DELIM+DELIM+entry.getValue().getType()+DELIM+DELIM+df.format(entry.getValue().getDate())+DELIM+entry.getValue().getAmount());
             fileWrite.close();
         } catch (IOException e) {
             e.printStackTrace();
