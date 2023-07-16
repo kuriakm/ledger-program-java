@@ -217,7 +217,7 @@ public class Ledger {
         }
     }
 
-    public void clearTrans() {
+    public void clearLedger() {
         ledger.clear();
     }
 }

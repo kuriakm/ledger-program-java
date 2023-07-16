@@ -18,6 +18,7 @@ public class LedgerFE {
     public static final String READ = "READ";
     public static final String WRITE = "WRITE";
     public static final String DELETE = "DELETE";
+    public static final String CLEAR = "CLEAR";
     public static final String QUIT = "QUIT";
     public static final String YES = "YES";
     public static final String NO = "NO";
@@ -51,6 +52,7 @@ public class LedgerFE {
             PRINT+" to print your current transactions listed\n"+
             READ+" to read a file with pre-existing transactions\n"+
             WRITE+" to write a file with your current transactions\n"+
+            CLEAR+" to clear the console\n"+
             DELETE+" to remove all transactions from your ledger\n"+
             QUIT+" to end the program");
     }
@@ -87,6 +89,9 @@ public class LedgerFE {
                     break;
                 case WRITE:
                     writeToFile();
+                    break;
+                case CLEAR:
+                    clearConsole();
                     break;
                 case DELETE:
                     delete();
@@ -222,7 +227,7 @@ public class LedgerFE {
             "\nWARNING: This action cannot be undone. Type [Y/n]");
         String choice = k.nextLine();
         if (choice.equalsIgnoreCase("Y") || choice.equalsIgnoreCase(YES))
-            ledger.clearTrans();
+            ledger.clearLedger();
     }
 
     public static void printTrans() {
@@ -246,6 +251,19 @@ public class LedgerFE {
         System.out.println("Type the name of the file that you want to write to.");
         String wName = k.nextLine();
         ledger.writeToFile(wName);
+    }
+
+    public static void clearConsole() {
+        try {
+            if (System.getProperty("os.name").contains("Windows")) {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+            } else {
+                System.out.print("\033\143");
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void quit() {
