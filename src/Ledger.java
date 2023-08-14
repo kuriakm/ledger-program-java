@@ -5,7 +5,10 @@ import java.util.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.HashMap; // Data structure to store transactions;
+                          // main component
+import java.util.ArrayList; // For sorting transactions
+import java.util.Collections;
 
 public class Ledger {
     private HashMap<String, Transactions> ledger = new HashMap<String, Transactions>();;
@@ -46,12 +49,13 @@ public class Ledger {
     }
 
     public void print() {
-        // TODO: fix sorted print issues
-        /* Transactions[] sorted = sortByDate();
+        // TEST CODE START
+        ArrayList<Transactions> sorted = sortTransactions();
         for (Transactions t : sorted)
-            System.out.println(t); */
-        for (HashMap.Entry<String, Transactions> entry : ledger.entrySet())
-            System.out.println(entry.getValue());
+            System.out.println(t);
+        // TEST CODE END
+        /* for (HashMap.Entry<String, Transactions> entry : ledger.entrySet())
+            System.out.println(entry.getValue()); */
     }
 
     public void editType(String key, String updatedType) {
@@ -88,63 +92,14 @@ public class Ledger {
         return false;
     }
 
-/*     public boolean contains(Transactions searchValue) {
-        for (HashMap.Entry<String, Transactions> entry : ledger.entrySet()) {
-            if (entry.getValue().getType().equals(searchValue.getType())
-                && entry.getValue().getDate().equals(searchValue.getDate())
-                && entry.getValue().getAmount().equals(searchValue.getAmount()))
-                return true;
-            }
-        return false;
-    } */
-/* 
-    private Transactions[] sortByDate() {
-        // Converted HashMap into sortable array for printing
-        Transactions[] sortedLedger = new Transactions[ledger.size()];
-        int i = 0;
-        for (Entry<String, Transactions> entry : ledger.entrySet()) {
-            sortedLedger[i] = entry.getValue();
-            i++;
-        }
-        mergeSort(sortedLedger, ledger.size());
-        return sortedLedger;
+    private ArrayList<Transactions> sortTransactions() {
+        ArrayList<Transactions> sortedTrans = new ArrayList<Transactions>();
+        for (HashMap.Entry<String, Transactions> entry : ledger.entrySet())
+            sortedTrans.add(entry.getValue());
+        Collections.sort(sortedTrans);
+        return sortedTrans;
     }
 
-    // Big O Time Complexity: O(nlogn)
-    // Big O Space Complexity: O(n)
-    private static void mergeSort(Transactions arr[], int size) {
-        if (size < 2)
-            return;
-        int mid = size / 2;
-        Transactions[] left = new Transactions[mid];
-        Transactions[] right = new Transactions[size - mid];
-
-        for (int i = 0; i < mid; i++)
-            left[i] = arr[i];
-
-        for (int i = mid; i < size; i++)
-            right[i - mid] = arr[i];
-    
-        mergeSort(left, mid);
-        mergeSort(right, size - mid);
-        merge(arr, left, right, mid, (size - mid));
-    }
-
-    private static void merge(Transactions arr[], Transactions[] l, Transactions[] r, int left, int right) {
-        int i = 0, j = 0, k = 0;
-        while (i < left && j < right) {
-            if (l[i].compareTo(r[j]) <= 0)
-                arr[k++] = l[i++];
-            else
-                arr[k++] = r[j++];
-        }
-
-        while (i < left)
-            arr[k++] = l[i++];
-        while (j < right)
-            arr[k++] = r[j++];
-    }
- */
     public static final int HEADER_FIELD = 4, BODY_FIELD = 4;
     public void readFile(String name) throws ParseException {
         try {

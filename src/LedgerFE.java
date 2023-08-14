@@ -269,16 +269,31 @@ public class LedgerFE {
     public static void quit() {
         System.out.println("Would you like to save your session? Type [Y/n]");
         String saveChoice = k.nextLine();
-
+        int counter = 0;
         if (saveChoice.equalsIgnoreCase("Y") || saveChoice.equalsIgnoreCase(YES)) {
             if (userFile == null) {
                 writeToFile();
+                clearConsole();
             } else {
                 ledger.writeToFile(userFile);
+                clearConsole();
             }
-            System.out.println("Goodbye!");
+            
+            while (counter < 10) {
+                counter++;
+            }
+            if (counter == 10) {
+                System.out.println("Goodbye!");
+            }
         } else {
-            System.out.println("Goodbye!");
+            clearConsole();
+            counter = 0;
+                while (counter < 10) {
+                    counter++;
+                }
+                if (counter == 10) {
+                    System.out.println("Goodbye!");
+                }
         }
     }
 }

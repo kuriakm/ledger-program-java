@@ -106,37 +106,6 @@ public class Transactions implements Comparable<Transactions>{
     }
 
     public int compareTo(Transactions aT) {
-        return (this.type.compareTo(aT.type) < 0) ? -1 : ((this.type == aT.type) ? (this.date.compareTo(aT.date)) : 1);
+        return this.date.compareTo(aT.getDate());
     }
-
-    /*
-    public int compareTo(Transactions aT) {
-        if(this.date.compareTo(aT.date) < 0)
-            return -1;
-        else if(this.date.compareTo(aT.date) > 0)
-            return 1;
-        else if(this.date.compareTo(aT.date) == 0)
-            return this.type.compareTo(aT.type);
-        else
-            return 0;
-    }
-
-    public static void main(String[] args) {
-        try {
-            Date date1 = df.parse("2022-12-23");
-            Date date2 = df.parse("2022-12-03");    
-    
-            Transactions t1 = new Transactions("Deposit", date1, 50.0);
-            Transactions t2 = new Transactions("Withdrawal", date2, 20);
-
-            System.out.println(t1);
-            System.out.println(t2);
-            System.out.println("\n");
-            System.out.println(t1.compareTo(t2));
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
-    */
 }
