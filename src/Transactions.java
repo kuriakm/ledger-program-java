@@ -3,15 +3,15 @@ import java.text.SimpleDateFormat;
 import java.math.BigDecimal;
 import java.util.Random;
 
-public class Transactions implements Comparable<Transactions>{
-    private String type;
-    private BigDecimal amt;
-    private Date date;
-    private String id;
+public class Transactions implements Comparable<Transactions> {
+    private String type = null;
+    private BigDecimal amt = null;
+    private Date date = null;
+    private String id = null;
     private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    public static final String DEPOSIT = "Deposit";
-    public static final String WITHDRAWAL = "Withdrawal";
-    public static final String KEY_CHARS = "aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789";
+    private static final String DEPOSIT = "Deposit";
+    private static final String WITHDRAWAL = "Withdrawal";
+    private static final String KEY_CHARS = "aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789";
 
     // This accounts for read-in files with pre-existing IDs
     public Transactions(String aT, Date aD, BigDecimal aA, String ID) {
@@ -33,9 +33,9 @@ public class Transactions implements Comparable<Transactions>{
     }
 
     public void setType(String aT) {
-        if(aT.equalsIgnoreCase("D") || aT.equalsIgnoreCase(DEPOSIT))
+        if (aT.equalsIgnoreCase("D") || aT.equalsIgnoreCase(DEPOSIT))
             this.type = "Deposit";
-        else if(aT.equalsIgnoreCase("W") || aT.equalsIgnoreCase(WITHDRAWAL))
+        else if (aT.equalsIgnoreCase("W") || aT.equalsIgnoreCase(WITHDRAWAL))
             this.type = "Withdrawal";
         else
             System.out.println("Invalid transaction type.");
@@ -47,18 +47,18 @@ public class Transactions implements Comparable<Transactions>{
 
     public void setAmount(BigDecimal aA) {
         BigDecimal def = new BigDecimal(0.00);
-        if(aA != null)
-           this.amt = aA.add(def);
+        if (aA != null)
+            this.amt = aA.add(def);
         else
-           System.out.println("Invalid amount."); 
+            System.out.println("Invalid amount.");
     }
 
     public Date getDate() {
         return this.date;
-    }    
+    }
 
     public void setDate(Date aD) {
-        if(aD != null)
+        if (aD != null)
             this.date = aD;
         else
             System.out.println("Invalid date.");
@@ -86,23 +86,23 @@ public class Transactions implements Comparable<Transactions>{
     }
 
     public String toString() {
-        if(this.type.equals("Deposit"))
-            return "["+this.type+"]: \n"+
-                "   Transaction ID: "+this.id+" \n"+
-                "   Date: "+df.format(this.date)+" \n"+
-                "   Amount: $"+this.amt.setScale(2);
+        if (this.type.equals("Deposit"))
+            return "[" + this.type + "]: \n" +
+                    "   Transaction ID: " + this.id + " \n" +
+                    "   Date: " + df.format(this.date) + " \n" +
+                    "   Amount: $" + this.amt.setScale(2);
         else
-            return "["+this.type+"]: \n"+
-                "   Transaction ID: "+this.id+" \n"+
-                "   Date: "+df.format(this.date)+" \n"+
-                "   Amount: -$"+this.amt.setScale(2);
+            return "[" + this.type + "]: \n" +
+                    "   Transaction ID: " + this.id + " \n" +
+                    "   Date: " + df.format(this.date) + " \n" +
+                    "   Amount: -$" + this.amt.setScale(2);
     }
 
     public boolean equals(Transactions aT) {
         return aT != null &&
-            this.type.equalsIgnoreCase(aT.getType()) &&
-            this.date.equals(aT.getDate()) &&
-            this.amt.compareTo(aT.getAmount()) == 0;
+                this.type.equalsIgnoreCase(aT.getType()) &&
+                this.date.equals(aT.getDate()) &&
+                this.amt.compareTo(aT.getAmount()) == 0;
     }
 
     public int compareTo(Transactions aT) {

@@ -1,45 +1,66 @@
-import java.io.*;
-import java.util.Scanner;
-//import java.util.Map.Entry;
 import java.util.Date;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.math.BigDecimal;
-import java.util.HashMap; // Data structure to store transactions;
-                          // main component
-import java.util.ArrayList; // For sorting transactions
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Collections;
 
 public class Ledger {
-    private HashMap<String, Transactions> ledger = new HashMap<String, Transactions>();;
-    public static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    public static final String DELIM = "\t";
-    public static final String FIRST_CHECK = "TRANSACTION ID";
+    private static Ledger ledger = null;
+    private static HashMap<String, Transactions> listOfTransactions = null;
+    private static String fileName = null;
 
-    public Ledger() { // Since the HashMap is already instantiated, I left this method blank
+    private Ledger() {
+        listOfTransactions = new HashMap<String, Transactions>();
     }
 
-    public boolean isEmpty() {
-        if (ledger.isEmpty())
+    private Ledger(String file) throws ParseException {
+        fileName = file;
+        if (fileName != null)
+            listOfTransactions = DataLoader.readFile(fileName);
+    }
+
+    protected static Ledger getInstance(String file) throws ParseException {
+        if (ledger == null)
+            ledger = new Ledger(file);
+        return ledger;
+    }
+
+    protected static Ledger getInstance() {
+        if (ledger == null)
+            ledger = new Ledger();
+        return ledger;
+    }
+
+    protected HashMap<String, Transactions> getListOfTransactions() {
+        return listOfTransactions;
+    }
+
+    protected boolean isEmpty() {
+        if (listOfTransactions.isEmpty())
             return true;
         else
             return false;
     }
 
-    public void addTrans(Transactions aT) {
+    protected void addTransaction(Transactions aT) {
         if (aT == null) // Precursor check
             return;
-        ledger.put(aT.getID(), aT);
+        listOfTransactions.put(aT.getID(), aT);
     }
 
-    public void removeTrans(String key) {
-        if (ledger.containsKey(key))
-            ledger.remove(key);
+    protected void removeTransaction(String key) {
+        if (listOfTransactions.containsKey(key))
+            listOfTransactions.remove(key);
     }
 
-    public BigDecimal totalUp() {
+    public void clearLedger() {
+        listOfTransactions.clear();
+    }
+
+    protected BigDecimal totalUp() {
         BigDecimal total = new BigDecimal(0.00);
-        for (HashMap.Entry<String, Transactions> entry : ledger.entrySet()) {
+        for (HashMap.Entry<String, Transactions> entry : listOfTransactions.entrySet()) {
             if (entry.getValue().getType().equals("Deposit"))
                 total = total.add(entry.getValue().getAmount());
             else
@@ -48,43 +69,41 @@ public class Ledger {
         return total;
     }
 
-    public void print() {
-        // TEST CODE START
+    protected void print() {
         ArrayList<Transactions> sorted = sortTransactions();
         for (Transactions t : sorted)
             System.out.println(t);
-        // TEST CODE END
-        /* for (HashMap.Entry<String, Transactions> entry : ledger.entrySet())
-            System.out.println(entry.getValue()); */
     }
 
-    public void editType(String key, String updatedType) {
-        ledger.put(key, new Transactions(updatedType, ledger.get(key).getDate(), ledger.get(key).getAmount(), key));
+    protected void editType(String key, String updatedType) {
+        listOfTransactions.put(key, new Transactions(updatedType, listOfTransactions.get(key).getDate(),
+                listOfTransactions.get(key).getAmount(), key));
     }
 
-    public void editDate(String key, Date updatedDate) {
-        ledger.put(key, new Transactions(ledger.get(key).getType(), updatedDate, ledger.get(key).getAmount(), key));
+    protected void editDate(String key, Date updatedDate) {
+        listOfTransactions.put(key, new Transactions(listOfTransactions.get(key).getType(), updatedDate,
+                listOfTransactions.get(key).getAmount(), key));
     }
 
-    public void editAmount(String key, BigDecimal updatedAmount) throws ParseException {
-        ledger.put(key, new Transactions(ledger.get(key).getType(), ledger.get(key).getDate(), updatedAmount, key));
+    protected void editAmount(String key, BigDecimal updatedAmount) throws ParseException {
+        listOfTransactions.put(key, new Transactions(listOfTransactions.get(key).getType(),
+                listOfTransactions.get(key).getDate(), updatedAmount, key));
     }
 
-    // If the transaction was found, the user will be informed and the transaction will display on the screen
-    public boolean searchTrans(String key) {
-        if (ledger.containsKey(key)) {
-                System.out.println("\nThe transaction was found!\n"+ledger.get(key));
-                return true;
+    protected boolean searchTransaction(String key) {
+        if (listOfTransactions.containsKey(key)) {
+            System.out.println("\nThe transaction was found!\n" + listOfTransactions.get(key));
+            return true;
         }
         return false;
     }
 
-    public boolean searchTrans(String type, Date date, BigDecimal amount) throws ParseException {
+    protected boolean searchTransaction(String type, Date date, BigDecimal amount) throws ParseException {
         if (type != null && date != null && amount != null) {
             Transactions searchValue = new Transactions(type, date, amount);
-            for (HashMap.Entry<String, Transactions> entry : ledger.entrySet()) {
+            for (HashMap.Entry<String, Transactions> entry : listOfTransactions.entrySet()) {
                 if (entry.getValue().equals(searchValue)) {
-                    System.out.println("\nThe transaction was found!\n"+entry.getValue());
+                    System.out.println("\nThe transaction was found!\n" + entry.getValue());
                     return true;
                 }
             }
@@ -94,85 +113,9 @@ public class Ledger {
 
     private ArrayList<Transactions> sortTransactions() {
         ArrayList<Transactions> sortedTrans = new ArrayList<Transactions>();
-        for (HashMap.Entry<String, Transactions> entry : ledger.entrySet())
+        for (HashMap.Entry<String, Transactions> entry : listOfTransactions.entrySet())
             sortedTrans.add(entry.getValue());
         Collections.sort(sortedTrans);
         return sortedTrans;
-    }
-
-    public static final int HEADER_FIELD = 4, BODY_FIELD = 4;
-    public void readFile(String name) throws ParseException {
-        try {
-            Scanner read = new Scanner(new File(name));
-            // Read header
-            String firstLine = read.nextLine();
-            String[] headerLine = firstLine.split(DELIM);
-            if (headerLine.length != HEADER_FIELD && headerLine[0] != FIRST_CHECK) {
-                    read.close();
-                    readFileWithoutHeader(name);
-            }
-            else {
-                while(read.hasNextLine()) {
-                    String fileLine = read.nextLine();
-                    String[] splitLine = fileLine.split(DELIM);
-                    if (splitLine.length != BODY_FIELD) // Check to make sure there are four pieces of info
-                        continue;
-                    String id = splitLine[0];
-                    String type = splitLine[1];
-                    Date date = df.parse(splitLine[2]);
-                    BigDecimal amount = new BigDecimal(splitLine[3]);
-                    Transactions aT = new Transactions(type, date, amount, id);
-                    this.addTrans(aT);
-                }
-                read.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Added interoperablity for older file formats (aka ones without a header)
-    public void readFileWithoutHeader(String name) throws ParseException {
-        try {
-            Scanner read = new Scanner(new File(name));
-            while(read.hasNextLine()) {
-                String fileLine = read.nextLine();
-                String[] splitLine = fileLine.split(DELIM);
-                if (splitLine.length != BODY_FIELD) // Check to make sure there are four pieces of info
-                    continue;
-                String id = splitLine[0];
-                String type = splitLine[1];
-                Date date = df.parse(splitLine[2]);
-                BigDecimal amount = new BigDecimal(splitLine[3]);
-                Transactions aT = new Transactions(type, date, amount, id);
-                this.addTrans(aT);
-            }
-            read.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void writeToFile(String name) {
-        try {
-            PrintWriter fileWrite = new PrintWriter(new FileOutputStream(new File(name)));
-            // Transactions[] sorted = sortByDate();
-            // for (Transactions t : sorted)
-            // Print Header
-            fileWrite.println("TRANSACTION ID"+DELIM+"TYPE"+DELIM+"DATE"+DELIM+"AMOUNT");
-            // Testing new format below
-            //fileWrite.println("TRANSACTION ID"+DELIM+"TYPE"+DELIM+DELIM+"DATE"+DELIM+DELIM+"AMOUNT");
-            // Print Content
-            for (HashMap.Entry<String, Transactions> entry : ledger.entrySet()) //TODO fix format for Deposits and Withdrawals
-            fileWrite.println(entry.getValue().getID()+DELIM+entry.getValue().getType()+DELIM+df.format(entry.getValue().getDate())+DELIM+entry.getValue().getAmount());
-                //fileWrite.println(entry.getValue().getID()+DELIM+DELIM+entry.getValue().getType()+DELIM+DELIM+df.format(entry.getValue().getDate())+DELIM+entry.getValue().getAmount());
-            fileWrite.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void clearLedger() {
-        ledger.clear();
     }
 }
