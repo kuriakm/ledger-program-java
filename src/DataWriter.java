@@ -1,24 +1,38 @@
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
-public class DataWriter {
-    private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    private static final String DELIM = "\t";
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
-    public static void writeToFile(String name, HashMap<String, Transactions> ledger) {
-        try {
-            PrintWriter fileWrite = new PrintWriter(new FileOutputStream(new File(name)));
-            fileWrite.println("TRANSACTION ID" + DELIM + "TYPE" + DELIM + "DATE" + DELIM + "AMOUNT");
-            for (HashMap.Entry<String, Transactions> entry : ledger.entrySet())
-                fileWrite.println(entry.getValue().getID() + DELIM + entry.getValue().getType() + DELIM
-                        + df.format(entry.getValue().getDate()) + DELIM + entry.getValue().getAmount());
-            fileWrite.close();
-        } catch (IOException e) {
+public class DataWriter extends DataConstants {
+    private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+    public static void saveTransactions(HashMap<String, Transactions> listOfTransactions) {
+        /*
+         * Ledger ledger = Ledger.getInstance("Yes");
+         * HashMap<String, Transactions> listOfTransactions =
+         * ledger.getListOfTransactions();
+         */
+        JSONArray jsonTransactions = new JSONArray();
+
+        for (HashMap.Entry<String, Transactions> entry : listOfTransactions.entrySet())
+            jsonTransactions.add(getTransactionsJSON(entry.getValue()));
+
+        try (FileWriter file = new FileWriter(FILE_NAME)) {
+            file.write(jsonTransactions.toJSONString());
+            file.flush();
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static JSONObject getTransactionsJSON(Transactions transaction) {
+        JSONObject transactionDetails = new JSONObject();
+        transactionDetails.put(ID, transaction.getID());
+        transactionDetails.put(TYPE, transaction.getType());
+        transactionDetails.put(DATE, df.format(transaction.getDate()));
+        transactionDetails.put(AMOUNT, transaction.getAmount().toString());
+        return transactionDetails;
     }
 }

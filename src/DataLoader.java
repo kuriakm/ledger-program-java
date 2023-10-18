@@ -1,70 +1,34 @@
-import java.io.File;
-import java.io.IOException;
+import java.io.FileReader;
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Scanner;
 
-public class DataLoader {
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+public class DataLoader extends DataConstants {
     private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    private static final String DELIM = "\t";
-    private static final String FIRST_CHECK = "TRANSACTION ID";
-    private static final int HEADER_FIELD = 4, BODY_FIELD = 4;
 
-    public static HashMap<String, Transactions> readFile(String name) throws ParseException {
-        HashMap<String, Transactions> ledger = new HashMap<String, Transactions>();
+    public static HashMap<String, Transactions> loadTransactions() {
+        HashMap<String, Transactions> transactions = new HashMap<String, Transactions>();
         try {
-            Scanner read = new Scanner(new File(name));
-            // Read header
-            String firstLine = read.nextLine();
-            String[] headerLine = firstLine.split(DELIM);
-            if (headerLine.length != HEADER_FIELD && headerLine[0] != FIRST_CHECK) {
-                read.close();
-                readFileWithoutHeader(name);
-            } else {
-                while (read.hasNextLine()) {
-                    String fileLine = read.nextLine();
-                    String[] splitLine = fileLine.split(DELIM);
-                    if (splitLine.length != BODY_FIELD) // Check to make sure there are four pieces of info
-                        continue;
-                    String id = splitLine[0];
-                    String type = splitLine[1];
-                    Date date = df.parse(splitLine[2]);
-                    BigDecimal amount = new BigDecimal(splitLine[3]);
-                    Transactions aT = new Transactions(type, date, amount, id);
-                    ledger.put(id, aT);
-                }
-                read.close();
-                return ledger;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+            FileReader reader = new FileReader(FILE_NAME);
+            JSONParser parser = new JSONParser();
+            JSONArray listJSON = (JSONArray) new JSONParser().parse(reader);
 
-    // Added interoperablity for older file formats (aka ones without a header)
-    public static HashMap<String, Transactions> readFileWithoutHeader(String name) throws ParseException {
-        HashMap<String, Transactions> ledger = new HashMap<String, Transactions>();
-        try {
-            Scanner read = new Scanner(new File(name));
-            while (read.hasNextLine()) {
-                String fileLine = read.nextLine();
-                String[] splitLine = fileLine.split(DELIM);
-                if (splitLine.length != BODY_FIELD) // Check to make sure there are four pieces of info
-                    continue;
-                String id = splitLine[0];
-                String type = splitLine[1];
-                Date date = df.parse(splitLine[2]);
-                BigDecimal amount = new BigDecimal(splitLine[3]);
+            for (int i = 0; i < listJSON.size(); i++) {
+                JSONObject transactionJSON = (JSONObject) listJSON.get(i);
+                Date date = df.parse((String) transactionJSON.get(DATE));
+                String id = (String) transactionJSON.get(ID);
+                BigDecimal amount = new BigDecimal((String) transactionJSON.get(AMOUNT));
+                String type = (String) transactionJSON.get(TYPE);
                 Transactions aT = new Transactions(type, date, amount, id);
-                ledger.put(id, aT);
+                transactions.put(id, aT);
             }
-            read.close();
-            return ledger;
-        } catch (IOException e) {
+            return transactions;
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

@@ -8,15 +8,15 @@ public class LedgerFacade {
     private Ledger ledger = null;
     private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
     private static LedgerFacade facade = null;
-    private static String file = null;
+    private static boolean loadFile = false;
 
     private LedgerFacade() throws ParseException {
-        file = "temp_save";
         this.ledger = Ledger.getInstance();
     }
 
-    private LedgerFacade(String fileName) throws ParseException {
-        this.ledger = Ledger.getInstance(getFileName());
+    private LedgerFacade(boolean loadFile) throws ParseException {
+        loadFile = true;
+        this.ledger = Ledger.getInstance(loadFile);
     }
 
     public static LedgerFacade getInstance() throws ParseException {
@@ -25,14 +25,14 @@ public class LedgerFacade {
         return facade;
     }
 
-    public static LedgerFacade getInstance(String file) throws ParseException {
-        if (facade == null && file != null)
-            facade = new LedgerFacade(file);
+    public static LedgerFacade getInstance(boolean loadFile) throws ParseException {
+        if (facade == null && loadFile != false)
+            facade = new LedgerFacade(loadFile);
         return facade;
     }
 
-    protected static String getFileName() {
-        return file;
+    public static boolean getLoadFile() {
+        return loadFile;
     }
 
     public boolean addTransaction(String tType, String tDate, String tAmount) {
@@ -115,24 +115,30 @@ public class LedgerFacade {
         return true;
     }
 
+    public boolean printTotal() {
+        if (isEmpty())
+            return false;
+        System.out.println("The total amount of money you have is: $"
+                + (totalUp() == null ? "0.00" : totalUp()));
+        return true;
+    }
+
     public BigDecimal totalUp() {
         if (isEmpty())
             return null;
         return ledger.totalUp();
     }
 
-    public boolean readFile(String file) throws ParseException {
-        if (file == null)
+    public boolean readFile(boolean loadFile) throws ParseException {
+        if (loadFile == false)
             return false;
-        ledger = Ledger.getInstance(file);
+        ledger = Ledger.getInstance(loadFile);
         return true;
     }
 
-    public boolean writeFile(String file) {
-        if (file == null)
-            return false;
+    public boolean writeFile() {
         HashMap<String, Transactions> writeToFile = ledger.getListOfTransactions();
-        DataWriter.writeToFile(file, writeToFile);
+        DataWriter.saveTransactions(writeToFile);
         return true;
     }
 

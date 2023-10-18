@@ -1,6 +1,6 @@
-import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 public class Transactions implements Comparable<Transactions> {

@@ -8,21 +8,18 @@ import java.util.Collections;
 public class Ledger {
     private static Ledger ledger = null;
     private static HashMap<String, Transactions> listOfTransactions = null;
-    private static String fileName = null;
 
     private Ledger() {
         listOfTransactions = new HashMap<String, Transactions>();
     }
 
-    private Ledger(String file) throws ParseException {
-        fileName = file;
-        if (fileName != null)
-            listOfTransactions = DataLoader.readFile(fileName);
+    private Ledger(boolean loadFile) {
+        listOfTransactions = DataLoader.loadTransactions();
     }
 
-    protected static Ledger getInstance(String file) throws ParseException {
+    protected static Ledger getInstance(boolean loadFile) {
         if (ledger == null)
-            ledger = new Ledger(file);
+            ledger = new Ledger(loadFile);
         return ledger;
     }
 

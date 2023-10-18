@@ -25,10 +25,7 @@ public class LedgerFE {
     public void run() throws ParseException {
         printGreetings();
         facade = askForFile();
-        if (LedgerFacade.getFileName() != null) {
-            printTotal();
-            menu();
-        }
+        menu();
     }
 
     public static void printGreetings() {
@@ -39,9 +36,7 @@ public class LedgerFE {
         System.out.println("Do you have a file you would like to add?\nType [Y/n]");
         String answer = k.nextLine();
         if (answer.equalsIgnoreCase(YES) || answer.equalsIgnoreCase("Y")) {
-            System.out.println("Great! Enter the name of the file you wish to use.");
-            userFile = k.nextLine();
-            LedgerFacade facade = LedgerFacade.getInstance(userFile);
+            LedgerFacade facade = LedgerFacade.getInstance(true);
             return facade;
         } else {
             System.out.println("That's okay.");
@@ -64,6 +59,7 @@ public class LedgerFE {
     }
 
     public static void menu() throws ParseException {
+        printTotal();
         boolean quit = false;
         while (!quit) {
             menuOptions();
@@ -123,9 +119,9 @@ public class LedgerFE {
 
             boolean checkMethod = facade.addTransaction(type, date, amount);
             if (!checkMethod)
-                System.out.println("There was an error when trying to add your transaction. Please try again.");
+                System.out.println("There was an error when trying to add your transaction. Please try again later.");
         } catch (Exception e) {
-            System.out.println("There was an error when trying to add your transaction. Please try again.");
+            System.out.println("There was an error when trying to add your transaction. Please try again later.");
         }
     }
 
@@ -138,7 +134,8 @@ public class LedgerFE {
             String pID = k.nextLine();
             boolean checkMethod = facade.removeTransaction(pID);
             if (!checkMethod)
-                System.out.println("There was an error when trying to remove your transaction. Please try again.");
+                System.out
+                        .println("There was an error when trying to remove your transaction. Please try again later.");
         }
     }
 
@@ -163,7 +160,7 @@ public class LedgerFE {
         String valueToEdit = k.nextLine();
         boolean checkMethod = facade.editTransaction(pID, valueType, valueToEdit);
         if (!checkMethod)
-            System.out.println("There was an error when trying to edit your transaction. Please try again.");
+            System.out.println("There was an error when trying to edit your transaction. Please try again later.");
     }
 
     public static void search() {
@@ -181,7 +178,8 @@ public class LedgerFE {
                     searchByDetails();
             }
         } catch (Exception e) {
-            System.out.println("There was an error when trying to search for your transaction. Please try again.");
+            System.out
+                    .println("There was an error when trying to search for your transaction. Please try again later.");
         }
     }
 
@@ -226,30 +224,27 @@ public class LedgerFE {
     }
 
     public static void printTotal() {
-        System.out.println("The total amount of money you have is: $"
-                + (facade.totalUp() == null ? "0.00" : facade.totalUp()) + "\n");
+        boolean checkMethod = facade.printTotal();
+        if (!checkMethod)
+            System.out.println("There was a problem totaling up your transactions, please try again later.");
     }
 
-    public static void readFile() {
-        try {
-            System.out.println("Type the name of the file you wish to use.");
-            String fName = k.nextLine();
-            facade.readFile(fName);
-        } catch (Exception e) {
-            System.out.println("There was an error when trying to read your file. Please try again.");
-        }
+    public static void readFile() throws ParseException {
+        boolean checkMethod = facade.readFile(true);
+        if (!checkMethod)
+            System.out.println("There was an error when trying to read your file. Please try again later.");
     }
 
     public static void writeToFile() {
-        System.out.println("Type the name of the file that you want to write to.");
-        String wName = k.nextLine();
-        facade.writeFile(wName);
+        boolean checkMethod = facade.writeFile();
+        if (!checkMethod)
+            System.out.println("There was an error when trying to read your file. Please try again later.");
     }
 
     public static void clearConsole() {
         boolean checkMethod = facade.clearConsole();
         if (!checkMethod)
-            System.out.println("There was an error when trying to clear the console. Please try again.");
+            System.out.println("There was an error when trying to clear the console. Please try again later.");
     }
 
     public static void quit() {
@@ -261,7 +256,7 @@ public class LedgerFE {
                 writeToFile();
                 clearConsole();
             } else {
-                facade.writeFile(userFile);
+                facade.writeFile();
                 clearConsole();
             }
 
